@@ -1,1 +1,145 @@
-<!-- form.html com menu lateral e formulário -->
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <title>Configuração da IA</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f5f5f5;
+      color: #333;
+      padding: 40px;
+    }
+    .container {
+      max-width: 800px;
+      margin: auto;
+      background: #fff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    }
+    h1 {
+      text-align: center;
+      font-size: 26px;
+      color: #111;
+    }
+    label {
+      font-weight: 500;
+      display: block;
+      margin: 15px 0 5px;
+    }
+    input[type="text"],
+    input[type="number"],
+    input[type="color"],
+    select {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+    .section {
+      margin-top: 30px;
+      border-top: 1px solid #ddd;
+      padding-top: 20px;
+    }
+    button {
+      display: block;
+      margin: 30px auto 0;
+      padding: 12px 24px;
+      background-color: #444;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #111;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>ChatFlow – Configuração da IA</h1>
+    <form method="POST" action="/salvar">
+      <div class="section">
+        <h2>Cadastro de Cliente</h2>
+        <label>Nome da Empresa</label>
+        <input type="text" name="empresa" value="{{ dados.get('empresa', '') if dados else '' }}" required>
+
+        <label>WhatsApp Business do Cliente</label>
+        <input type="text" name="numero_zapi" value="{{ dados.get('numero_zapi', '') if dados else '' }}" required>
+
+        <label>Nome do Consultor</label>
+        <input type="text" name="nome_consultor" value="{{ dados.get('consultor', {}).get('nome', '') if dados else '' }}" required>
+
+        <label>Número do Consultor</label>
+        <input type="text" name="numero_consultor" value="{{ dados.get('consultor', {}).get('numero', '') if dados else '' }}" required>
+
+        <label>Cor Principal</label>
+        <input type="color" name="cor" value="{{ dados.get('cor', '#cccccc') if dados else '#cccccc' }}">
+
+        <label>Nome do Atendente</label>
+        <input type="text" name="atendente" value="{{ dados.get('atendente', '') if dados else '' }}" required>
+      </div>
+
+      <div class="section">
+        <h2>Personalização das Etapas da IA</h2>
+        <label>Texto de Saudação</label>
+        <input type="text" name="saudacao" value="{{ dados.get('mensagens', {}).get('saudacao', '') if dados else '' }}" required>
+
+        <label>Pergunta para Nome</label>
+        <input type="text" name="coleta_nome" value="{{ dados.get('mensagens', {}).get('coleta_nome', '') if dados else '' }}" required>
+
+        <label>Texto Final de Encerramento</label>
+        <input type="text" name="encerramento" value="{{ dados.get('mensagens', {}).get('encerramento', '') if dados else '' }}" required>
+      </div>
+
+      <div class="section">
+        <h2>Fluxo: Opções de Texto</h2>
+        <label>Interesse (2 opções)</label>
+        <input type="text" name="interesse1" value="{{ dados.get('fluxo', {}).get('interesse', ['',''])[0] if dados else '' }}">
+        <input type="text" name="interesse2" value="{{ dados.get('fluxo', {}).get('interesse', ['',''])[1] if dados else '' }}">
+
+        <label>Forma de Pagamento (2 opções)</label>
+        <input type="text" name="pagamento1" value="{{ dados.get('fluxo', {}).get('pagamento', ['',''])[0] if dados else '' }}">
+        <input type="text" name="pagamento2" value="{{ dados.get('fluxo', {}).get('pagamento', ['',''])[1] if dados else '' }}">
+
+        <label>À Vista – Detalhes (4 opções)</label>
+        {% for i in range(4) %}
+        <input type="text" name="avista{{ i+1 }}" value="{{ dados.get('fluxo', {}).get('avista_detalhe', ['','','',''])[i] if dados else '' }}">
+        {% endfor %}
+
+        <label>Entrada (5 opções)</label>
+        {% for i in range(5) %}
+        <input type="text" name="entrada{{ i+1 }}" value="{{ dados.get('fluxo', {}).get('entrada', ['']*5)[i] if dados else '' }}">
+        {% endfor %}
+
+        <label>Parcelas (4 opções)</label>
+        {% for i in range(4) %}
+        <input type="text" name="parcelas{{ i+1 }}" value="{{ dados.get('fluxo', {}).get('parcelas', ['']*4)[i] if dados else '' }}">
+        {% endfor %}
+      </div>
+
+      <div class="section">
+        <h2>Controle Avançado</h2>
+        <label>Tempo entre Blocos de Texto (segundos)</label>
+        <input type="number" name="tempo_bloco" value="{{ dados.get('config_avancada', {}).get('tempo_bloco', 3) if dados else 3 }}">
+
+        <label>Divisão de Mensagens por Número de Palavras</label>
+        <input type="number" name="palavras_por_bloco" value="{{ dados.get('config_avancada', {}).get('palavras_por_bloco', 12) if dados else 12 }}">
+
+        <label>Uso de Áudios</label>
+        <select name="usar_audios">
+          <option value="on" {% if dados and dados.get('config_avancada', {}).get('usar_audios') %}selected{% endif %}>Sim</option>
+          <option value="" {% if dados and not dados.get('config_avancada', {}).get('usar_audios') %}selected{% endif %}>Não</option>
+        </select>
+      </div>
+
+      <button type="submit">Salvar Configuração</button>
+    </form>
+  </div>
+</body>
+</html>
