@@ -1,22 +1,96 @@
 
 <!DOCTYPE html>
 <html lang="pt-br">
-<head><meta charset="UTF-8"><title>Meus Áudios</title></head>
+<head>
+  <meta charset="UTF-8">
+  <title>Meus Áudios</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: #f5f5f5;
+      padding: 40px;
+      color: #333;
+    }
+    .container {
+      max-width: 700px;
+      margin: auto;
+      background: #fff;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.05);
+    }
+    h1 {
+      text-align: center;
+      color: #111;
+    }
+    form {
+      margin-bottom: 30px;
+    }
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: 500;
+    }
+    input[type="text"], input[type="file"] {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+    }
+    button {
+      margin-top: 20px;
+      padding: 10px 20px;
+      background: #444;
+      color: #fff;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #111;
+    }
+    ul {
+      list-style: none;
+      padding-left: 0;
+    }
+    li {
+      padding: 10px 0;
+      border-bottom: 1px solid #ddd;
+      display: flex;
+      justify-content: space-between;
+    }
+    audio {
+      margin-left: 10px;
+    }
+  </style>
+</head>
 <body>
-  <h2>Meus Áudios</h2>
-  <form method="POST" enctype="multipart/form-data">
-    <label>Nome da intenção (ex: formas_pagamento):</label><br>
-    <input type="text" name="intencao" required><br><br>
-    <label>Arquivo de áudio (.ogg):</label><br>
-    <input type="file" name="arquivo" accept=".ogg" required><br><br>
-    <button type="submit">Enviar Áudio</button>
-  </form>
-  <h3>Áudios Enviados</h3>
-  {% for nome, arquivo in arquivos %}
-    <p><strong>{{ nome }}:</strong><br>
-      <audio controls><source src="/audio/chatflow/{{ arquivo }}" type="audio/ogg"></audio>
-    </p>
-  {% endfor %}
-  <p><a href="/painel">← Voltar ao Painel</a></p>
+  <div class="container">
+    <h1>Meus Áudios</h1>
+    <form method="POST" enctype="multipart/form-data" action="/audios">
+      <label>Nome da intenção (ex: formas_pagamento)</label>
+      <input type="text" name="intencao" required>
+
+      <label>Arquivo de áudio (.ogg)</label>
+      <input type="file" name="arquivo" accept=".ogg" required>
+
+      <button type="submit">Enviar Áudio</button>
+    </form>
+
+    <h2>Áudios Enviados</h2>
+    <ul>
+      {% for chave, nome in arquivos %}
+        <li>
+          {{ chave }}:
+          <audio controls>
+            <source src="/audio/{{ session['usuario']|lower|replace(' ', '_') }}/{{ nome }}" type="audio/ogg">
+            Seu navegador não suporta áudio.
+          </audio>
+        </li>
+      {% else %}
+        <li>Nenhum áudio enviado ainda.</li>
+      {% endfor %}
+    </ul>
+  </div>
 </body>
 </html>
