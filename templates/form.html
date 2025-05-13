@@ -1,77 +1,191 @@
 
 <!DOCTYPE html>
 <html lang="pt-br">
-<head><meta charset="UTF-8"><title>Painel de Configuração</title></head>
+<head>
+  <meta charset="UTF-8">
+  <title>Painel de Configuração da IA</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      background: #f4f4f4;
+      color: #333;
+    }
+    .sidebar {
+      height: 100%;
+      width: 0;
+      position: fixed;
+      z-index: 1;
+      top: 0;
+      left: 0;
+      background-color: #333;
+      overflow-x: hidden;
+      transition: 0.3s;
+      padding-top: 60px;
+    }
+    .sidebar a {
+      padding: 12px 24px;
+      text-decoration: none;
+      font-size: 18px;
+      color: #f1f1f1;
+      display: block;
+      transition: 0.2s;
+    }
+    .sidebar a:hover {
+      background-color: #575757;
+    }
+    .openbtn {
+      font-size: 20px;
+      cursor: pointer;
+      background-color: #333;
+      color: white;
+      padding: 12px 16px;
+      border: none;
+      margin: 16px;
+    }
+    .openbtn:hover {
+      background-color: #444;
+    }
+    #main {
+      transition: margin-left .3s;
+      padding: 20px;
+    }
+    .content {
+      max-width: 900px;
+      margin: auto;
+      background: white;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 0 8px rgba(0,0,0,0.1);
+    }
+    label {
+      display: block;
+      margin-top: 15px;
+      font-weight: 600;
+    }
+    input[type="text"], input[type="number"], input[type="color"], select {
+      width: 100%;
+      padding: 8px;
+      margin-top: 4px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+    }
+    button {
+      margin-top: 20px;
+      padding: 12px 24px;
+      background: #444;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #000;
+    }
+  </style>
+</head>
 <body>
-  <h2>Formulário de Configuração</h2>
-  <form method="POST" action="/salvar">
-    <label>Empresa</label><br>
-    <input type="text" name="empresa"><br>
 
-    <label>WhatsApp Z-API</label><br>
-    <input type="text" name="numero_zapi"><br>
+<div id="mySidebar" class="sidebar">
+  <a href="/painel">⚙️ Configuração</a>
+  <a href="/audios">🔊 Gerenciar Áudios</a>
+  <a href="/ver_logs">📝 Ver Logs</a>
+  <a href="/logout">🚪 Sair</a>
+</div>
 
-    <label>Nome do Consultor</label><br>
-    <input type="text" name="nome_consultor"><br>
+<div id="main">
+  <button class="openbtn" onclick="toggleMenu()">☰ Menu</button>
 
-    <label>Número do Consultor</label><br>
-    <input type="text" name="numero_consultor"><br>
+  <div class="content">
+    <h1>Painel de Configuração da IA</h1>
+    <form method="POST" action="/salvar">
+      <label>Nome da Empresa</label>
+      <input type="text" name="empresa" required>
 
-    <label>Cor Principal</label><br>
-    <input type="color" name="cor"><br>
+      <label>WhatsApp Business do Cliente</label>
+      <input type="text" name="numero_zapi" required>
 
-    <label>Nome do Atendente</label><br>
-    <input type="text" name="atendente"><br>
+      <label>Nome do Consultor</label>
+      <input type="text" name="nome_consultor" required>
 
-    <label>Saudação</label><br>
-    <input type="text" name="saudacao"><br>
+      <label>Número do Consultor</label>
+      <input type="text" name="numero_consultor" required>
 
-    <label>Coleta Nome</label><br>
-    <input type="text" name="coleta_nome"><br>
+      <label>Cor Principal</label>
+      <input type="color" name="cor" value="#cccccc">
 
-    <label>Encerramento</label><br>
-    <input type="text" name="encerramento"><br>
+      <label>Nome do Atendente</label>
+      <input type="text" name="atendente" required>
 
-    <label>Interesse (2)</label><br>
-    <input type="text" name="interesse1">
-    <input type="text" name="interesse2"><br>
+      <label>Texto de Saudação</label>
+      <input type="text" name="saudacao" required>
 
-    <label>Pagamento (2)</label><br>
-    <input type="text" name="pagamento1">
-    <input type="text" name="pagamento2"><br>
+      <label>Pergunta para Nome</label>
+      <input type="text" name="coleta_nome" required>
 
-    <label>À Vista (4)</label><br>
-    <input type="text" name="avista1">
-    <input type="text" name="avista2">
-    <input type="text" name="avista3">
-    <input type="text" name="avista4"><br>
+      <label>Texto Final de Encerramento</label>
+      <input type="text" name="encerramento" required>
 
-    <label>Entrada (5)</label><br>
-    <input type="text" name="entrada1">
-    <input type="text" name="entrada2">
-    <input type="text" name="entrada3">
-    <input type="text" name="entrada4">
-    <input type="text" name="entrada5"><br>
+      <label>Interesse (2 opções)</label>
+      <input type="text" name="interesse1">
+      <input type="text" name="interesse2">
 
-    <label>Parcelas (4)</label><br>
-    <input type="text" name="parcelas1">
-    <input type="text" name="parcelas2">
-    <input type="text" name="parcelas3">
-    <input type="text" name="parcelas4"><br>
+      <label>Forma de Pagamento (2 opções)</label>
+      <input type="text" name="pagamento1">
+      <input type="text" name="pagamento2">
 
-    <label>Tempo entre blocos</label><br>
-    <input type="number" name="tempo_bloco"><br>
+      <label>À Vista – Detalhes (4 opções)</label>
+      <input type="text" name="avista1">
+      <input type="text" name="avista2">
+      <input type="text" name="avista3">
+      <input type="text" name="avista4">
 
-    <label>Palavras por bloco</label><br>
-    <input type="number" name="palavras_por_bloco"><br>
+      <label>Entrada (5 opções)</label>
+      <input type="text" name="entrada1">
+      <input type="text" name="entrada2">
+      <input type="text" name="entrada3">
+      <input type="text" name="entrada4">
+      <input type="text" name="entrada5">
 
-    <label>Usar áudios</label><br>
-    <select name="usar_audios">
-      <option value="on">Sim</option>
-      <option value="">Não</option>
-    </select><br><br>
+      <label>Parcelas (4 opções)</label>
+      <input type="text" name="parcelas1">
+      <input type="text" name="parcelas2">
+      <input type="text" name="parcelas3">
+      <input type="text" name="parcelas4">
 
-    <button type="submit">Salvar</button>
-  </form>
+      <label>Tempo entre Blocos (segundos)</label>
+      <input type="number" name="tempo_bloco" min="1" value="3">
+
+      <label>Palavras por Bloco</label>
+      <input type="number" name="palavras_por_bloco" min="5" value="12">
+
+      <label>Usar Áudios</label>
+      <select name="usar_audios">
+        <option value="on" selected>Sim</option>
+        <option value="">Não</option>
+      </select>
+
+      <button type="submit">Salvar Configuração</button>
+    </form>
+  </div>
+</div>
+
+<script>
+function toggleMenu() {
+  let sidebar = document.getElementById("mySidebar");
+  let main = document.getElementById("main");
+  if (sidebar.style.width === "250px") {
+    sidebar.style.width = "0";
+    main.style.marginLeft = "0";
+  } else {
+    sidebar.style.width = "250px";
+    main.style.marginLeft = "250px";
+  }
+}
+</script>
+
 </body>
 </html>
