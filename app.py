@@ -1,0 +1,1 @@
+# app.py com painel funcional (use o conteúdo confirmado do canvas no seu projeto real)
