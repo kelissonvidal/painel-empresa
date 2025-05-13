@@ -1,4 +1,4 @@
-# painel_config_ia/app.py
+
 from flask import Flask, render_template, request, redirect, url_for, session, send_from_directory, jsonify
 import os, json
 from datetime import datetime
@@ -131,4 +131,5 @@ def salvar():
     return redirect(url_for("painel"))
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    port = int(os.environ.get("PORT", 10000))
+    app.run(host="0.0.0.0", port=port)
