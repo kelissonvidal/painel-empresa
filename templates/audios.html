@@ -1,1 +1,22 @@
-<!-- audios.html -->
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head><meta charset="UTF-8"><title>Meus Áudios</title></head>
+<body>
+  <h2>Meus Áudios</h2>
+  <form method="POST" enctype="multipart/form-data">
+    <label>Nome da intenção (ex: formas_pagamento):</label><br>
+    <input type="text" name="intencao" required><br><br>
+    <label>Arquivo de áudio (.ogg):</label><br>
+    <input type="file" name="arquivo" accept=".ogg" required><br><br>
+    <button type="submit">Enviar Áudio</button>
+  </form>
+  <h3>Áudios Enviados</h3>
+  {% for nome, arquivo in arquivos %}
+    <p><strong>{{ nome }}:</strong><br>
+      <audio controls><source src="/audio/chatflow/{{ arquivo }}" type="audio/ogg"></audio>
+    </p>
+  {% endfor %}
+  <p><a href="/painel">← Voltar ao Painel</a></p>
+</body>
+</html>

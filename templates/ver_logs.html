@@ -1,1 +1,23 @@
-<!-- ver_logs.html -->
+
+<!DOCTYPE html>
+<html lang="pt-br">
+<head><meta charset="UTF-8"><title>Logs</title></head>
+<body>
+  <h2>Logs de Dúvidas</h2>
+  {% if registros %}
+  <table border="1">
+    <tr><th>Data/Hora</th><th>Telefone</th><th>Mensagem</th></tr>
+    {% for item in registros %}
+    <tr>
+      <td>{{ item.data }}</td>
+      <td>{{ item.telefone }}</td>
+      <td>{{ item.mensagem }}</td>
+    </tr>
+    {% endfor %}
+  </table>
+  {% else %}
+  <p>Nenhum registro encontrado.</p>
+  {% endif %}
+  <p><a href="/painel">← Voltar ao Painel</a></p>
+</body>
+</html>
