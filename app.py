@@ -81,6 +81,39 @@ def salvar():
     dados = request.form.to_dict()
     nome_arquivo = session["usuario"].lower().replace(" ", "_") + ".json"
 
+    @app.route("/audios", methods=["GET", "POST"])
+def audios():
+    if "usuario" not in session:
+        return redirect(url_for("login"))
+
+    empresa = session["usuario"].lower().replace(" ", "_")
+    audio_dir = os.path.join(AUDIO_DIR, empresa)
+    os.makedirs(audio_dir, exist_ok=True)
+    json_path = os.path.join(audio_dir, "audios.json")
+
+    audios = {}
+    if os.path.exists(json_path):
+        with open(json_path, "r", encoding="utf-8") as f:
+            audios = json.load(f)
+
+    if request.method == "POST":
+        intencao = request.form["intencao"]
+        arquivo = request.files["arquivo"]
+        if arquivo:
+            nome = f"{intencao}.ogg"
+            caminho = os.path.join(audio_dir, nome)
+            arquivo.save(caminho)
+            audios[intencao] = nome
+            with open(json_path, "w", encoding="utf-8") as f:
+                json.dump(audios, f, indent=2, ensure_ascii=False)
+        return redirect(url_for("audios"))
+
+    return render_template("audios.html", arquivos=audios.items())
+
+    @app.route("/audio/<empresa>/<nome>")
+def audio_empresa(empresa, nome):
+    return send_from_directory(os.path.join(AUDIO_DIR, empresa), nome)
+
     config = {
         "empresa": dados.get("empresa"),
         "numero_zapi": dados.get("numero_zapi"),
