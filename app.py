@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, session, send_from_directory, jsonify
 import os, json
 from datetime import datetime
+import subprocess
 
 app = Flask(__name__)
 app.secret_key = "chave_secreta_simples"
@@ -10,6 +11,10 @@ USERS_FILE = "usuarios.json"
 AUDIO_DIR = "audios"
 os.makedirs(CONFIG_DIR, exist_ok=True)
 os.makedirs(AUDIO_DIR, exist_ok=True)
+
+def converter_para_ogg(origem, destino):
+    comando = ["ffmpeg", "-y", "-i", origem, "-acodec", "libopus", destino]
+    subprocess.run(comando, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
 
 @app.route("/")
 def home():
@@ -92,10 +97,15 @@ def audios():
         intencao = request.form["intencao"]
         arquivo = request.files["arquivo"]
         if arquivo:
-            nome = f"{intencao}.ogg"
-            caminho = os.path.join(audio_dir, nome)
-            arquivo.save(caminho)
-            audios[intencao] = nome
+            ext = os.path.splitext(arquivo.filename)[1].lower()
+            temp_path = os.path.join(audio_dir, f"temp{ext}")
+            arquivo.save(temp_path)
+
+            ogg_final = os.path.join(audio_dir, f"{intencao}.ogg")
+            converter_para_ogg(temp_path, ogg_final)
+            os.remove(temp_path)
+
+            audios[intencao] = f"{intencao}.ogg"
             with open(json_path, "w", encoding="utf-8") as f:
                 json.dump(audios, f, indent=2, ensure_ascii=False)
         return redirect(url_for("audios"))
@@ -130,25 +140,9 @@ def salvar():
         "fluxo": {
             "interesse": [dados.get("interesse1"), dados.get("interesse2")],
             "pagamento": [dados.get("pagamento1"), dados.get("pagamento2")],
-            "avista_detalhe": [
-                dados.get("avista1"),
-                dados.get("avista2"),
-                dados.get("avista3"),
-                dados.get("avista4")
-            ],
-            "entrada": [
-                dados.get("entrada1"),
-                dados.get("entrada2"),
-                dados.get("entrada3"),
-                dados.get("entrada4"),
-                dados.get("entrada5")
-            ],
-            "parcelas": [
-                dados.get("parcelas1"),
-                dados.get("parcelas2"),
-                dados.get("parcelas3"),
-                dados.get("parcelas4")
-            ]
+            "avista_detalhe": [dados.get("avista1"), dados.get("avista2"), dados.get("avista3"), dados.get("avista4")],
+            "entrada": [dados.get("entrada1"), dados.get("entrada2"), dados.get("entrada3"), dados.get("entrada4"), dados.get("entrada5")],
+            "parcelas": [dados.get("parcelas1"), dados.get("parcelas2"), dados.get("parcelas3"), dados.get("parcelas4")]
         },
         "config_avancada": {
             "tempo_bloco": int(dados.get("tempo_bloco", 3)),
