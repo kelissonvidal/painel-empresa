@@ -32,6 +32,8 @@ def enviar_mensagem(numero, texto):
 @app.route("/webhook", methods=["POST"])
 def webhook():
     data = request.json
+    print("📩 Payload recebido:")
+    print(json.dumps(data, indent=2, ensure_ascii=False))
 
     if data.get("type") != "received":
         return jsonify({"status": "ignored"})
