@@ -34,7 +34,14 @@ def enviar_mensagem(numero, texto):
         "phone": numero,
         "message": texto
     }
-    requests.post(url, json=payload, headers=headers)
+    print("📤 Enviando mensagem para:", numero)
+    print("📄 Conteúdo:", texto)
+    try:
+        response = requests.post(url, json=payload, headers=headers)
+        print("✅ Status da resposta:", response.status_code)
+        print("📬 Retorno da Z-API:", response.text)
+    except Exception as e:
+        print("❌ Erro ao enviar mensagem:", e)
 
 @app.route("/webhook", methods=["POST"])
 def webhook():
