@@ -11,9 +11,16 @@ ZAPI_INSTANCE_TOKEN = os.getenv("ZAPI_INSTANCE_TOKEN")
 ZAPI_CLIENT_TOKEN = os.getenv("ZAPI_CLIENT_TOKEN")
 
 def carregar_dados():
-    if os.path.exists(USERS_FILE):
-        with open(USERS_FILE, "r", encoding="utf-8") as f:
-            return json.load(f)
+    try:
+        if os.path.exists(USERS_FILE):
+            with open(USERS_FILE, "r", encoding="utf-8") as f:
+                data = json.load(f)
+                if isinstance(data, dict):
+                    return data
+                else:
+                    print("⚠️ usuarios.json contém estrutura inválida (esperado dict, recebido list).")
+    except Exception as e:
+        print("⚠️ Erro ao carregar usuarios.json:", e)
     return {}
 
 def salvar_dados(dados):
