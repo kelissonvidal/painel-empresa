@@ -35,10 +35,10 @@ def webhook():
     print("📩 Payload recebido:")
     print(json.dumps(data, indent=2, ensure_ascii=False))
 
-    if data.get("type") != "received":
+    if data.get("type") != "ReceivedCallback":
         return jsonify({"status": "ignored"})
 
-    mensagem = data.get("message", "").strip()
+    mensagem = data.get("text", {}).get("message", "").strip()
     numero = data.get("phone", "").replace("+", "").replace(" ", "")
     usuarios = carregar_dados()
 
