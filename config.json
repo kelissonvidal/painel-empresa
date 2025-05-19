@@ -1,0 +1,10 @@
+{
+  "saudacao": "Olá! Seja muito bem-vindo.",
+  "coleta_nome": "Qual é o seu nome, por favor?",
+  "resposta_nome": "Prazer em te conhecer, {nome}!",
+  "pergunta_interesse": "Qual o seu interesse?\n1️⃣ Investimento\n2️⃣ Sede da empresa",
+  "pergunta_pagamento": "Como pretende pagar?\n1️⃣ À vista\n2️⃣ Parcelado",
+  "pergunta_forma": "Qual a forma de pagamento?\n1️⃣ Pix\n2️⃣ Cartão\n3️⃣ Financiamento\n4️⃣ Consórcio",
+  "pergunta_info": "Gostaria de saber mais sobre localização, metragem, infraestrutura ou prefere falar direto com o consultor?",
+  "encerramento": "Obrigado, {nome}! Vou te encaminhar agora para um consultor que vai continuar seu atendimento."
+}

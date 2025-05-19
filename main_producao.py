@@ -12,7 +12,7 @@ ZAPI_INSTANCE_ID = os.getenv("ZAPI_INSTANCE_ID")
 ZAPI_INSTANCE_TOKEN = os.getenv("ZAPI_INSTANCE_TOKEN")
 ZAPI_CLIENT_TOKEN = os.getenv("ZAPI_CLIENT_TOKEN")
 
-# Conexão Redis
+# Redis
 redis_url = os.getenv("REDIS_URL")
 parsed_url = urllib.parse.urlparse(redis_url)
 redis_client = redis.Redis(
@@ -21,6 +21,10 @@ redis_client = redis.Redis(
     password=parsed_url.password,
     ssl=True
 )
+
+# Leitura do arquivo config.json
+with open("config.json", "r", encoding="utf-8") as f:
+    config = json.load(f)
 
 def enviar_mensagem(numero, texto):
     url = f"https://api.z-api.io/instances/{ZAPI_INSTANCE_ID}/token/{ZAPI_INSTANCE_TOKEN}/send-text"
@@ -67,28 +71,33 @@ def webhook():
         return jsonify({"status": "finalizado"})
 
     if etapa == 0:
-        enviar_mensagem(numero, "Olá! Seja muito bem-vindo. Qual é o seu nome, por favor?")
+        enviar_mensagem(numero, config["saudacao"])
+        time.sleep(1)
+        enviar_mensagem(numero, config["coleta_nome"])
         redis_client.hset(redis_key, "etapa", 1)
 
     elif etapa == 1:
         redis_client.hset(redis_key, mapping={"nome": mensagem, "etapa": 2})
+        nome = mensagem
         time.sleep(2)
-        enviar_mensagem(numero, f"{mensagem}, me diga por favor: você está buscando um lote para investimento ou para montar a sede da sua empresa?")
+        enviar_mensagem(numero, config["resposta_nome"].replace("{nome}", nome))
+        time.sleep(2)
+        enviar_mensagem(numero, config["pergunta_interesse"])
 
     elif etapa == 2:
         redis_client.hset(redis_key, mapping={"interesse": mensagem, "etapa": 3})
         time.sleep(2)
-        enviar_mensagem(numero, "Perfeito! Agora me diz: pretende pagar à vista ou parcelado?")
+        enviar_mensagem(numero, config["pergunta_pagamento"])
 
     elif etapa == 3:
         redis_client.hset(redis_key, mapping={"forma_pagamento": mensagem, "etapa": 4})
         time.sleep(2)
-        enviar_mensagem(numero, "Certo. Como pretende fazer esse pagamento? Cartão, Pix, financiamento, consórcio?")
+        enviar_mensagem(numero, config["pergunta_forma"])
 
     elif etapa == 4:
         redis_client.hset(redis_key, mapping={"tipo_pagamento": mensagem, "etapa": 5})
         time.sleep(2)
-        enviar_mensagem(numero, "Gostaria de saber mais sobre localização, metragem, infraestrutura ou prefere falar direto com o consultor?")
+        enviar_mensagem(numero, config["pergunta_info"])
 
     elif etapa == 5:
         redis_client.hset(redis_key, mapping={"info_extra": mensagem, "etapa": 6})
@@ -107,7 +116,7 @@ def webhook():
             f"Contato: {numero}"
         )
         time.sleep(2)
-        enviar_mensagem(numero, "Obrigado! Vou te encaminhar agora para um consultor que vai continuar seu atendimento.")
+        enviar_mensagem(numero, config["encerramento"].replace("{nome}", nome))
         time.sleep(1)
         enviar_mensagem(CONSULTOR_NUMERO, resumo)
 
