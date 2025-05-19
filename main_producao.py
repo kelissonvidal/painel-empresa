@@ -40,7 +40,6 @@ def webhook():
     print("📩 Payload recebido:")
     print(json.dumps(data, indent=2, ensure_ascii=False))
 
-    # Ignorar mensagens que não são recebidas de cliente real
     if data.get("type") != "ReceivedCallback" or data.get("fromApi", False):
         print("⛔ Ignorado: não é mensagem recebida de cliente.")
         return jsonify({"status": "ignored"})
@@ -56,10 +55,11 @@ def webhook():
         return jsonify({"status": "erro redis"})
 
     if not user_data or b"etapa" not in user_data:
-        redis_client.hset(redis_key, mapping={"etapa": 0})
-        user_data = {"etapa": b"0"}
+        etapa = 0
+        redis_client.hset(redis_key, "etapa", 0)
+    else:
+        etapa = int(user_data[b"etapa"].decode())
 
-    etapa = int(user_data.get("etapa", b"0").decode())
     print(f"👣 Etapa atual de {numero}: {etapa}")
 
     if etapa >= 6:
