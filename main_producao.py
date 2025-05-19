@@ -47,41 +47,49 @@ def webhook():
     numero = data.get("phone", "").replace("+", "").replace(" ", "")
     redis_key = f"user:{numero}"
 
-    # Recupera ou inicializa dados do usuário
-    user_data = redis_client.hgetall(redis_key)
-    if not user_data:
+    try:
+        user_data = redis_client.hgetall(redis_key)
+    except Exception as e:
+        print(f"❌ Erro ao acessar Redis para {numero}: {e}")
+        return jsonify({"status": "erro redis"})
+
+    if not user_data or b"etapa" not in user_data:
         redis_client.hset(redis_key, mapping={"etapa": 0})
         user_data = {"etapa": b"0"}
 
     etapa = int(user_data.get("etapa", b"0").decode())
     print(f"👣 Etapa atual de {numero}: {etapa}")
 
+    if etapa >= 6:
+        print("⛔ Lead já finalizado. Nenhuma ação será tomada.")
+        return jsonify({"status": "finalizado"})
+
     if etapa == 0:
         enviar_mensagem(numero, "Olá! Seja muito bem-vindo. Qual é o seu nome, por favor?")
         redis_client.hset(redis_key, "etapa", 1)
 
     elif etapa == 1:
-        redis_client.hset(redis_key, "nome", mensagem, "etapa", 2)
+        redis_client.hset(redis_key, mapping={"nome": mensagem, "etapa": 2})
         time.sleep(2)
         enviar_mensagem(numero, f"{mensagem}, me diga por favor: você está buscando um lote para investimento ou para montar a sede da sua empresa?")
 
     elif etapa == 2:
-        redis_client.hset(redis_key, "interesse", mensagem, "etapa", 3)
+        redis_client.hset(redis_key, mapping={"interesse": mensagem, "etapa": 3})
         time.sleep(2)
         enviar_mensagem(numero, "Perfeito! Agora me diz: pretende pagar à vista ou parcelado?")
 
     elif etapa == 3:
-        redis_client.hset(redis_key, "forma_pagamento", mensagem, "etapa", 4)
+        redis_client.hset(redis_key, mapping={"forma_pagamento": mensagem, "etapa": 4})
         time.sleep(2)
         enviar_mensagem(numero, "Certo. Como pretende fazer esse pagamento? Cartão, Pix, financiamento, consórcio?")
 
     elif etapa == 4:
-        redis_client.hset(redis_key, "tipo_pagamento", mensagem, "etapa", 5)
+        redis_client.hset(redis_key, mapping={"tipo_pagamento": mensagem, "etapa": 5})
         time.sleep(2)
         enviar_mensagem(numero, "Gostaria de saber mais sobre localização, metragem, infraestrutura ou prefere falar direto com o consultor?")
 
     elif etapa == 5:
-        redis_client.hset(redis_key, "info_extra", mensagem, "etapa", 6)
+        redis_client.hset(redis_key, mapping={"info_extra": mensagem, "etapa": 6})
         nome = redis_client.hget(redis_key, "nome").decode()
         interesse = redis_client.hget(redis_key, "interesse").decode()
         forma = redis_client.hget(redis_key, "forma_pagamento").decode()
