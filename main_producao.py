@@ -12,7 +12,7 @@ ZAPI_INSTANCE_ID = os.getenv("ZAPI_INSTANCE_ID")
 ZAPI_INSTANCE_TOKEN = os.getenv("ZAPI_INSTANCE_TOKEN")
 ZAPI_CLIENT_TOKEN = os.getenv("ZAPI_CLIENT_TOKEN")
 
-# Conectar ao Redis com URL segura
+# Conexão Redis
 redis_url = os.getenv("REDIS_URL")
 parsed_url = urllib.parse.urlparse(redis_url)
 redis_client = redis.Redis(
@@ -40,7 +40,9 @@ def webhook():
     print("📩 Payload recebido:")
     print(json.dumps(data, indent=2, ensure_ascii=False))
 
-    if data.get("type") != "ReceivedCallback":
+    # Ignorar mensagens que não são recebidas de cliente real
+    if data.get("type") != "ReceivedCallback" or data.get("fromApi", False):
+        print("⛔ Ignorado: não é mensagem recebida de cliente.")
         return jsonify({"status": "ignored"})
 
     mensagem = data.get("text", {}).get("message", "").strip()
