@@ -24,13 +24,16 @@ CONFIG_URL = "https://raw.githubusercontent.com/kelissonvidal/painel-empresa/ref
 
 def carregar_config():
     try:
-        r = requests.get(CONFIG_URL)
-        if r.status_code == 200:
-            return r.json()
-        print("❌ Falha ao carregar config.json remoto")
-        return {}
+        res = requests.get(CONFIG_URL)
+        if res.status_code == 200:
+            print("✅ config.json carregado com sucesso")
+            print(res.text)
+            return res.json()
+        else:
+            print("❌ Falha ao carregar config.json:", res.status_code)
+            return {}
     except Exception as e:
-        print("❌ Erro ao acessar config.json remoto:", e)
+        print("❌ Erro ao acessar config.json:", e)
         return {}
 
 def enviar_mensagem(numero, texto):
@@ -39,7 +42,7 @@ def enviar_mensagem(numero, texto):
     payload = {"phone": numero, "message": texto}
     try:
         r = requests.post(url, json=payload, headers=headers)
-        print(f"📤 Enviando para {numero}: {texto}")
+        print(f"📤 Enviado para {numero}: {texto}")
         print("✅ Status:", r.status_code)
         print("📬 Resposta:", r.text)
     except Exception as e:
@@ -49,6 +52,8 @@ def enviar_mensagem(numero, texto):
 def webhook():
     config = carregar_config()
     data = request.json
+    print("📩 Payload recebido:")
+    print(json.dumps(data, indent=2, ensure_ascii=False))
 
     if data.get("type") != "ReceivedCallback" or data.get("fromApi", False):
         return jsonify({"status": "ignored"})
@@ -58,11 +63,8 @@ def webhook():
     redis_key = f"user:{numero}"
 
     user_data = redis_client.hgetall(redis_key)
-    if not user_data or b"etapa" not in user_data:
-        etapa = 0
-        redis_client.hset(redis_key, "etapa", 0)
-    else:
-        etapa = int(user_data[b"etapa"].decode())
+    etapa = int(user_data[b"etapa"].decode()) if b"etapa" in user_data else 0
+    redis_client.hset(redis_key, "etapa", etapa)
 
     print(f"👣 Etapa atual: {etapa}")
 
@@ -70,9 +72,9 @@ def webhook():
         return jsonify({"status": "finalizado"})
 
     if etapa == 0:
-        enviar_mensagem(numero, config.get("saudacao", "Olá!"))
+        enviar_mensagem(numero, config.get("saudacao", "Olá! Seja bem-vindo."))
         time.sleep(1)
-        enviar_mensagem(numero, config.get("coleta_nome", "Qual seu nome?"))
+        enviar_mensagem(numero, config.get("coleta_nome", "Qual é o seu nome?"))
         redis_client.hset(redis_key, "etapa", 1)
 
     elif etapa == 1:
@@ -96,7 +98,7 @@ def webhook():
     elif etapa == 4:
         redis_client.hset(redis_key, mapping={"tipo_pagamento": mensagem, "etapa": 5})
         time.sleep(2)
-        enviar_mensagem(numero, config.get("pergunta_info", "Deseja saber mais ou falar com o consultor?"))
+        enviar_mensagem(numero, config.get("pergunta_info", "Deseja saber mais sobre localização, metragem, estrutura ou falar direto com o consultor?"))
 
     elif etapa == 5:
         redis_client.hset(redis_key, mapping={"info_extra": mensagem, "etapa": 6})
@@ -106,7 +108,7 @@ def webhook():
         tipo = redis_client.hget(redis_key, "tipo_pagamento").decode()
         extra = mensagem
         resumo = (
-            "Novo lead captado:\n"
+            f"Novo lead captado:\n"
             f"Nome: {nome}\n"
             f"Interesse: {interesse}\n"
             f"Forma de pagamento: {forma}\n"
