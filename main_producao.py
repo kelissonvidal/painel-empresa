@@ -114,7 +114,7 @@ def webhook():
             f"Forma de pagamento: {forma}\n"
             f"Tipo de pagamento: {tipo}\n"
             f"Mais informações: {extra}\n"
-            f"Contato: {numero}"
+            f"WhatsApp: https://wa.me/{numero}"
         )
         time.sleep(2)
         enviar_mensagem(numero, config.get("encerramento", "Obrigado, {nome}!").replace("{nome}", nome))
